@@ -1,0 +1,97 @@
+头文件：
+#ifndef APPINIT_H
+#define APPINIT_H
+#include <QApplication>
+#include <QMouseEvent>
+#include <QMoveEvent>
+#include <QMutex>
+#include <QObject>
+#include <QPoint>
+#include <QWidget>
+class AppInit : public QObject {
+  Q_OBJECT
+public:
+  explicit AppInit(QObject *parent = nullptr);
+  static AppInit *getInstance();
+  void start();
+public:
+  static AppInit *instance;
+public slots:
+  bool eventFilter(QObject *obj, QEvent *event);
+private:
+  static AppInit *self;
+};
+源文件：
+#include "appinit.h"
+#include <QDebug>
+// 初始化静态变量
+AppInit *AppInit::self = nullptr;
+// 构造函数
+AppInit::AppInit(QObject *parent) : QObject(parent) {}
+// 启动函数
+void AppInit::start() {
+  // 监听过滤器安装到全局
+  qApp->installEventFilter(this);
+}
+// 获取实例
+AppInit *AppInit::getInstance() {
+  // 初始化类静态
+  static QMutex mutex;
+  if (!self) {
+    QMutexLocker locker(&mutex);
+    if (!self) {
+      self = new AppInit;
+    }
+  }
+  return self;
+}
+// 监听过滤器
+bool AppInit::eventFilter(QObject *obj, QEvent *event) {
+  // 把基类转换为界面类
+  QWidget *w = static_cast<QWidget *>(obj);
+  // 读取属性是否为真，为真是可以移动
+  if (!w->property("canMove").toBool()) {
+    // 把事件传递回基类
+    return QObject::eventFilter(obj, event);
+  }
+  // 鼠标是否按下
+  static bool mousePressed;
+  // 点位置
+  static QPoint mousePoint;
+  // 把事件强制转换为鼠标事件
+  QMouseEvent *evt = static_cast<QMouseEvent *>(event);
+  // 判断事件类型是不是鼠标左键
+  if (evt->type() == QEvent::MouseButtonPress) {
+    // 判断是否按下的左键
+    if (evt->button() == Qt::LeftButton) {
+      // 鼠标按下
+      mousePressed = true;
+      // 相对于桌面左上角原点坐标 - 距窗口左上上角去除边框的坐标
+      mousePoint = evt->globalPos() - w->pos();
+      return true;
+    }
+  } else if (event->type() == QEvent::MouseButtonRelease) {
+    // 鼠标抬起
+    mousePressed = false;
+    return true;
+  } else if (event->type() == QEvent::MouseMove) {
+    // 鼠标移动事件
+    // 鼠标左键按下，并没有抬起
+    qDebug() << mousePressed;
+    if (mousePressed && (evt->buttons() == Qt::LeftButton)) {
+      // 移动窗体位置
+      w->move(evt->globalPos() - mousePoint);
+      return true;
+    }
+  }
+  return QObject::eventFilter(obj, event);
+}
+
+ 1、在主函数main中调用
+
+AppInit::getInstance()->start();
+
+
+2、在需要移动的窗体构造函数中设置属性
+
+this->setProperty("canMove", true);
