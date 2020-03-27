@@ -1,4 +1,4 @@
-Í·ÎÄ¼ş£º
+ï»¿å¤´æ–‡ä»¶ï¼š
 #ifndef APPINIT_H
 #define APPINIT_H
 #include <QApplication>
@@ -21,21 +21,21 @@ public slots:
 private:
   static AppInit *self;
 };
-Ô´ÎÄ¼ş£º
+æºæ–‡ä»¶ï¼š
 #include "appinit.h"
 #include <QDebug>
-// ³õÊ¼»¯¾²Ì¬±äÁ¿
+// åˆå§‹åŒ–é™æ€å˜é‡
 AppInit *AppInit::self = nullptr;
-// ¹¹Ôìº¯Êı
+// æ„é€ å‡½æ•°
 AppInit::AppInit(QObject *parent) : QObject(parent) {}
-// Æô¶¯º¯Êı
+// å¯åŠ¨å‡½æ•°
 void AppInit::start() {
-  // ¼àÌı¹ıÂËÆ÷°²×°µ½È«¾Ö
+  // ç›‘å¬è¿‡æ»¤å™¨å®‰è£…åˆ°å…¨å±€
   qApp->installEventFilter(this);
 }
-// »ñÈ¡ÊµÀı
+// è·å–å®ä¾‹
 AppInit *AppInit::getInstance() {
-  // ³õÊ¼»¯Àà¾²Ì¬
+  // åˆå§‹åŒ–ç±»é™æ€
   static QMutex mutex;
   if (!self) {
     QMutexLocker locker(&mutex);
@@ -45,41 +45,41 @@ AppInit *AppInit::getInstance() {
   }
   return self;
 }
-// ¼àÌı¹ıÂËÆ÷
+// ç›‘å¬è¿‡æ»¤å™¨
 bool AppInit::eventFilter(QObject *obj, QEvent *event) {
-  // °Ñ»ùÀà×ª»»Îª½çÃæÀà
+  // æŠŠåŸºç±»è½¬æ¢ä¸ºç•Œé¢ç±»
   QWidget *w = static_cast<QWidget *>(obj);
-  // ¶ÁÈ¡ÊôĞÔÊÇ·ñÎªÕæ£¬ÎªÕæÊÇ¿ÉÒÔÒÆ¶¯
+  // è¯»å–å±æ€§æ˜¯å¦ä¸ºçœŸï¼Œä¸ºçœŸæ˜¯å¯ä»¥ç§»åŠ¨
   if (!w->property("canMove").toBool()) {
-    // °ÑÊÂ¼ş´«µİ»Ø»ùÀà
+    // æŠŠäº‹ä»¶ä¼ é€’å›åŸºç±»
     return QObject::eventFilter(obj, event);
   }
-  // Êó±êÊÇ·ñ°´ÏÂ
+  // é¼ æ ‡æ˜¯å¦æŒ‰ä¸‹
   static bool mousePressed;
-  // µãÎ»ÖÃ
+  // ç‚¹ä½ç½®
   static QPoint mousePoint;
-  // °ÑÊÂ¼şÇ¿ÖÆ×ª»»ÎªÊó±êÊÂ¼ş
+  // æŠŠäº‹ä»¶å¼ºåˆ¶è½¬æ¢ä¸ºé¼ æ ‡äº‹ä»¶
   QMouseEvent *evt = static_cast<QMouseEvent *>(event);
-  // ÅĞ¶ÏÊÂ¼şÀàĞÍÊÇ²»ÊÇÊó±ê×ó¼ü
+  // åˆ¤æ–­äº‹ä»¶ç±»å‹æ˜¯ä¸æ˜¯é¼ æ ‡å·¦é”®
   if (evt->type() == QEvent::MouseButtonPress) {
-    // ÅĞ¶ÏÊÇ·ñ°´ÏÂµÄ×ó¼ü
+    // åˆ¤æ–­æ˜¯å¦æŒ‰ä¸‹çš„å·¦é”®
     if (evt->button() == Qt::LeftButton) {
-      // Êó±ê°´ÏÂ
+      // é¼ æ ‡æŒ‰ä¸‹
       mousePressed = true;
-      // Ïà¶ÔÓÚ×ÀÃæ×óÉÏ½ÇÔ­µã×ø±ê - ¾à´°¿Ú×óÉÏÉÏ½ÇÈ¥³ı±ß¿òµÄ×ø±ê
+      // ç›¸å¯¹äºæ¡Œé¢å·¦ä¸Šè§’åŸç‚¹åæ ‡ - è·çª—å£å·¦ä¸Šä¸Šè§’å»é™¤è¾¹æ¡†çš„åæ ‡
       mousePoint = evt->globalPos() - w->pos();
       return true;
     }
   } else if (event->type() == QEvent::MouseButtonRelease) {
-    // Êó±êÌ§Æğ
+    // é¼ æ ‡æŠ¬èµ·
     mousePressed = false;
     return true;
   } else if (event->type() == QEvent::MouseMove) {
-    // Êó±êÒÆ¶¯ÊÂ¼ş
-    // Êó±ê×ó¼ü°´ÏÂ£¬²¢Ã»ÓĞÌ§Æğ
+    // é¼ æ ‡ç§»åŠ¨äº‹ä»¶
+    // é¼ æ ‡å·¦é”®æŒ‰ä¸‹ï¼Œå¹¶æ²¡æœ‰æŠ¬èµ·
     qDebug() << mousePressed;
     if (mousePressed && (evt->buttons() == Qt::LeftButton)) {
-      // ÒÆ¶¯´°ÌåÎ»ÖÃ
+      // ç§»åŠ¨çª—ä½“ä½ç½®
       w->move(evt->globalPos() - mousePoint);
       return true;
     }
@@ -87,11 +87,11 @@ bool AppInit::eventFilter(QObject *obj, QEvent *event) {
   return QObject::eventFilter(obj, event);
 }
 
- 1¡¢ÔÚÖ÷º¯ÊımainÖĞµ÷ÓÃ
+ 1ã€åœ¨ä¸»å‡½æ•°mainä¸­è°ƒç”¨
 
 AppInit::getInstance()->start();
 
 
-2¡¢ÔÚĞèÒªÒÆ¶¯µÄ´°Ìå¹¹Ôìº¯ÊıÖĞÉèÖÃÊôĞÔ
+2ã€åœ¨éœ€è¦ç§»åŠ¨çš„çª—ä½“æ„é€ å‡½æ•°ä¸­è®¾ç½®å±æ€§
 
 this->setProperty("canMove", true);
